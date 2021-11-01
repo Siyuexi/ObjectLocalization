@@ -22,7 +22,7 @@ log = open('log/resnet50-finetuning-log.txt','wt')
 """
 
 # 超参数设置
-num_epochs = 30   
+num_epochs = 60   
 num_classes = 5
 print_period = 5 # print per [print_period] batch
 lossmix_period = 0 # mix loss from [lossmix_period] epoch
@@ -32,7 +32,7 @@ learning_rate = 3e-3
 momentum = 9e-1
 val_test_rate = 0.5  
 L = 1 # lambda
-T = 0.7 # threshold of IoU
+T = 0.7 # threshold of IoU(not more than 0.7)
 
 # 定义图像转换
 transform = transforms.Compose([
