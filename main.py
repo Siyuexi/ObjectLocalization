@@ -1,11 +1,10 @@
 import torch
 from torchvision.models.resnet import  resnet18,resnet50
-from torchvision import transforms,models
+from torchvision import transforms
 from torch.utils.data import DataLoader,SubsetRandomSampler
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
-import numpy as np
 import sys
 
 import utils

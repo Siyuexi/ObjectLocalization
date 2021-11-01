@@ -43,9 +43,9 @@ class Net(Module):
             # v = self.dropout(v)
             v = self.relu(v)
             v = self.fc_r3(v)
+            # v = self.dropout(v)
         else:
             v = self.regression_fc(f)
-        # v = self.dropout(v)
         v = self.relu(v)
 
         # classification
