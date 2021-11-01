@@ -5,7 +5,7 @@ from torchvision.models.resnet import  resnet18
 # 使用现有sota的网络做特征提取，再手动接上两个fc网络
 class Net(Module):
     # 默认用pytorch集成的resnet18做特征提取
-    def __init__(self,dim_input=512,num_class=5,model=resnet18(pretrained=True),p=0.5,complex=False):
+    def __init__(self,dim_input=512,num_class=5,model=resnet18(pretrained=True),p=0.5,complex=(False,False)):
         super().__init__()
         self.dim= dim_input
         self.num_class = num_class
@@ -35,7 +35,7 @@ class Net(Module):
         f = self.feature_layers(i)
 
         # regression
-        if(self.complex):            
+        if(self.complex[0]):            
             v = self.fc_r1(f)
             v = self.dropout(v)
             v = self.relu(v)
@@ -48,7 +48,7 @@ class Net(Module):
         v = self.relu(v)
 
         # classification
-        if(self.complex):
+        if(self.complex[1]):
             c = self.fc_c1(f)
             c = self.dropout(c)
             c = self.relu(c)
@@ -58,6 +58,7 @@ class Net(Module):
             c = self.fc_c3(c)
         else:
             c = self.classification_fc(f)
+        c = self.dropout(c)
         c = self.relu(c)
         c = softmax(c,dim=0)
 

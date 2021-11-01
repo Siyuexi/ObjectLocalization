@@ -17,9 +17,7 @@ batch_size = 16
 
 transform = transforms.Compose([
     transforms.Resize(256),               # 把图片resize
-    # transforms.RandomCrop(224),           # 随机裁剪224*224
     transforms.ToTensor() , # 将图片转换为Tensor,归一化至[0,1]
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) #标准化
 ])
 
 # 导入数据集
@@ -64,14 +62,12 @@ with torch.no_grad():
     batch_iter = DataLoader(dataset=test_dataset,batch_size=batch_size,sampler = sampler_test)
     batch = next(iter(batch_iter))
 
-    print(batch[1]*224)
     imgs = (batch[0].permute(0, 2, 3, 1))/255.0
     axes = utils.show_images(imgs, 4, 4, scale=2)
     for ax, coo, label in zip(axes, batch[1], batch[2]):
         utils.show_bboxes(ax, [coo*224], labels=utils.N2C(label), colors=['w'])
 
     loc,cla = net(batch[0].to(device))
-    print(loc*224)
     for ax, coo, label in zip(axes, loc.cpu(), torch.argmax(cla.cpu().t(),dim=0)):
         utils.show_bboxes(ax, [coo*224], labels=utils.N2C(label), colors=['r'])
     plt.show()

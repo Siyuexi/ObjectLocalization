@@ -22,22 +22,22 @@ log = open('log/resnet50-finetuning-log.txt','wt')
 """
 
 # 超参数设置
-num_epochs = 10   
+num_epochs = 30   
 num_classes = 5
-print_period = 5
-lossmix_period = 0
+print_period = 5 # print per [print_period] batch
+lossmix_period = 0 # mix loss from [lossmix_period] epoch
 batch_size = 32  
 image_size = 128 
-learning_rate = 3e-4
+learning_rate = 3e-3
 momentum = 9e-1
 val_test_rate = 0.5  
+L = 1 # lambda
+T = 0.7 # threshold of IoU
 
 # 定义图像转换
 transform = transforms.Compose([
     transforms.Resize(224),               # 把图片resize
-    # transforms.RandomCrop(224),           # 随机裁剪224*224
     transforms.ToTensor() , # 将图片转换为Tensor,归一化至[0,1]
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) #标准化
 ])
 
 # 导入数据集
@@ -78,7 +78,7 @@ print("device : "+str(device),file=sys.stdout)
 
 # 网络初始化与参数记录
 # net = model.Net(dim_input=512,num_class=5,model=resnet18(pretrained=True),p=0.5,complex=False) 
-net = model.Net(dim_input=2048,num_class=5,model=resnet50(pretrained=True),p=0.5,complex=False) 
+net = model.Net(dim_input=2048,num_class=5,model=resnet50(pretrained=True),p=0.5,complex=(False,False)) 
 net = net.to(device)
 best_model_wts = net.state_dict()
 
@@ -115,10 +115,10 @@ for epoch in range(num_epochs):
         # 计算Loss
         loc,cla =  net(data) 
 
-        if(epoch>lossmix_period):
+        if(epoch>=lossmix_period):
             loss_class = criterion_class(cla, label) 
             loss_location = criterion_location(loc,coordinate)
-            loss = loss_class + loss_location
+            loss = loss_class + L*loss_location
         else:
             loss = criterion_class(cla, label) 
         
@@ -132,7 +132,7 @@ for epoch in range(num_epochs):
         train_NoAs.append(train_NoA)
 
         # 计算定位精度
-        train_IoU = utils.IoU(loc,coordinate)
+        train_IoU = utils.IoU(loc,coordinate,threshold=T)
         train_IoUs.append(train_IoU)
         
         """ 可视化：每间隔5个batch做一次validation，并且打印一次精度信息"""
@@ -142,7 +142,6 @@ for epoch in range(num_epochs):
             net.eval() 
             val_NoAs = [] 
             val_IoUs = []
-            
             #迭代已遍历过的训练集数据：
             for (data, coordinate,label) in validation_loader: 
 
@@ -159,7 +158,7 @@ for epoch in range(num_epochs):
                 val_NoAs.append(val_NoA)
 
                 # 
-                val_IoU = utils.IoU(loc,coordinate)
+                val_IoU = utils.IoU(loc,coordinate,threshold=T)
                 val_IoUs.append(val_IoU)
 
                 
@@ -241,23 +240,22 @@ with torch.no_grad():
         loc,cla = net(data)        
         test_NoA = utils.NoA(cla,label)
         test_NoAs.append(test_NoA)
-        test_IoU = utils.IoU(loc,coordinate)
+        test_IoU = utils.IoU(loc,coordinate,threshold=T)
         test_IoUs.append(test_IoU)
 
     # 抽前n个图片可视化分类和定位效果
     batch_iter = DataLoader(dataset=test_dataset,batch_size=batch_size,sampler = sampler_test)
     batch = next(iter(batch_iter))
 
-    print(batch[1]*224)
     imgs = (batch[0].permute(0, 2, 3, 1)) / 255.
     axes = utils.show_images(imgs, 4, 4, scale=2)
     for ax, coo, label in zip(axes, batch[1], batch[2]):
         utils.show_bboxes(ax, [coo*224], labels=utils.N2C(label), colors=['w'])
 
     loc,cla = net(batch[0].to(device))
-    print(loc*224)
     for ax, coo, label in zip(axes, loc.cpu(), torch.argmax(cla.cpu().t(),dim=0)):
         utils.show_bboxes(ax, [coo*224], labels=utils.N2C(label), colors=['r'])
+    plt.savefig('plot/Test-Sample-Graph.jpg')
     plt.show()
         
 # 计算准确率
