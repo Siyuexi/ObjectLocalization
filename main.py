@@ -22,20 +22,20 @@ log = open('log/resnet50-finetuning-log.txt','wt')
 """
 
 # 超参数设置
-num_epochs = 50   
+num_epochs = 10   
 num_classes = 5
 print_period = 5
 lossmix_period = 0
 batch_size = 32  
 image_size = 128 
-learning_rate = 3e-3
+learning_rate = 3e-4
 momentum = 9e-1
 val_test_rate = 0.5  
 
 # 定义图像转换
 transform = transforms.Compose([
-    transforms.Resize(256),               # 把图片resize为256*256
-    transforms.RandomCrop(224),           # 随机裁剪224*224
+    transforms.Resize(224),               # 把图片resize
+    # transforms.RandomCrop(224),           # 随机裁剪224*224
     transforms.ToTensor() , # 将图片转换为Tensor,归一化至[0,1]
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) #标准化
 ])
@@ -243,6 +243,22 @@ with torch.no_grad():
         test_NoAs.append(test_NoA)
         test_IoU = utils.IoU(loc,coordinate)
         test_IoUs.append(test_IoU)
+
+    # 抽前n个图片可视化分类和定位效果
+    batch_iter = DataLoader(dataset=test_dataset,batch_size=batch_size,sampler = sampler_test)
+    batch = next(iter(batch_iter))
+
+    print(batch[1]*224)
+    imgs = (batch[0].permute(0, 2, 3, 1)) / 255.
+    axes = utils.show_images(imgs, 4, 4, scale=2)
+    for ax, coo, label in zip(axes, batch[1], batch[2]):
+        utils.show_bboxes(ax, [coo*224], labels=utils.N2C(label), colors=['w'])
+
+    loc,cla = net(batch[0].to(device))
+    print(loc*224)
+    for ax, coo, label in zip(axes, loc.cpu(), torch.argmax(cla.cpu().t(),dim=0)):
+        utils.show_bboxes(ax, [coo*224], labels=utils.N2C(label), colors=['r'])
+    plt.show()
         
 # 计算准确率
 rights1 = (sum([tup[0] for tup in test_NoAs]), sum([tup[1] for tup in test_NoAs]))

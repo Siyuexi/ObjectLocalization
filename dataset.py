@@ -4,6 +4,7 @@ from torchvision.transforms import ToTensor
 from torch import tensor
 import os
 from PIL import Image
+import utils
 
 # 最好transform传入ToTensor参数
 class Set(Dataset):
@@ -37,7 +38,7 @@ class Set(Dataset):
         with open(self.root + '\\' + sub_class + '_gt.txt') as f:
             for line in f.readlines()[sub_index-1:sub_index]:
                 label_items = line.strip().split(' ')
-        coordinate = [float(label_items[i])/128 for i in range(1,5)]
+        coordinate = [float(label_items[i])/128.0 for i in range(1,5)]
         label = self._getclass(sub_class)
 
         if self.transform:
@@ -53,16 +54,4 @@ class Set(Dataset):
 
 
     def _getclass(self,sub_class):
-        if(sub_class=='bird'):
-            return 0
-        elif(sub_class=='car'):
-            return 1
-        elif(sub_class=='dog'):
-            return 2
-        elif(sub_class=='lizard'):
-            return 3
-        elif(sub_class=='turtle'):
-            return 4
-        else:
-            print("DATASET ERROR!")
-            return -1
+        return utils.C2N(sub_class)

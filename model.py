@@ -45,7 +45,6 @@ class Net(Module):
             v = self.fc_r3(v)
         else:
             v = self.regression_fc(f)
-        v = self.dropout(v)
         v = self.relu(v)
 
         # classification
@@ -59,7 +58,6 @@ class Net(Module):
             c = self.fc_c3(c)
         else:
             c = self.classification_fc(f)
-        c = self.dropout(c)
         c = self.relu(c)
         c = softmax(c,dim=0)
 

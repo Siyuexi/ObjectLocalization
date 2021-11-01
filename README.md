@@ -1,6 +1,7 @@
 # ObjectLocalization
 All images are sampled from VID.
 
+dataset:http://xinggangw.info/data/tiny_vid.zip
 tiny_vid:
 - target class: ['car', 'bird', 'turtle', 'dog', 'lizard']
 - image size: 128 * 128 
