@@ -37,10 +37,10 @@ class Net(Module):
         # regression
         if(self.complex[0]):            
             v = self.fc_r1(f)
-            v = self.dropout(v)
+            # v = self.dropout(v)
             v = self.relu(v)
             v = self.fc_r2(v)
-            v = self.dropout(v)
+            # v = self.dropout(v)
             v = self.relu(v)
             v = self.fc_r3(v)
         else:

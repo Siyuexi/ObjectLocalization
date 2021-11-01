@@ -21,7 +21,7 @@ class Set(Dataset):
             for name in f:
                 name_split = name.split('.')
                 if(name_split[1]==self.type):
-                    if(self.train and int(name_split[0])<=150 or ~self.train and int(name_split[0])>150):
+                    if((self.train==True and int(name_split[0])<=150) or (self.train==False and int(name_split[0])>150 and int(name_split[0])<=180)):
                         self.paths.append(os.path.join(r,name))
                         self.size += 1
 

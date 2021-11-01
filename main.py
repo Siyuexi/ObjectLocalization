@@ -32,7 +32,7 @@ learning_rate = 3e-3
 momentum = 9e-1
 val_test_rate = 0.5  
 L = 1 # lambda
-T = 0.7 # threshold of IoU(not more than 0.7)
+T = 0.5 # threshold of IoU(not more than 0.7)
 
 # 定义图像转换
 transform = transforms.Compose([
@@ -78,7 +78,7 @@ print("device : "+str(device),file=sys.stdout)
 
 # 网络初始化与参数记录
 # net = model.Net(dim_input=512,num_class=5,model=resnet18(pretrained=True),p=0.5,complex=False) 
-net = model.Net(dim_input=2048,num_class=5,model=resnet50(pretrained=True),p=0.5,complex=(False,False)) 
+net = model.Net(dim_input=2048,num_class=5,model=resnet50(pretrained=True),p=0.5,complex=(True,False)) 
 net = net.to(device)
 best_model_wts = net.state_dict()
 
