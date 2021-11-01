@@ -1,4 +1,3 @@
-from types import DynamicClassAttribute
 from torch.utils.data import Dataset
 from torchvision.transforms import ToTensor
 from torch import tensor
